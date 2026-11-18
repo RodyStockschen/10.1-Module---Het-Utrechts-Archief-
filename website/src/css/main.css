@@ -1,0 +1,29 @@
+@import './header.css';
+@import './footer.css';
+@import './player.css';
+@import './modal.css';
+@import './help.css';
+
+* { box-sizing: border-box; }
+
+body {
+    background: #fff;
+}
+
+a { color: inherit; }
+
+.button {
+    display: inline-block;
+    padding: 0.8rem 2rem;
+    background: var(--red);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 1rem;
+}
+
+.button:hover { opacity: 0.9; }

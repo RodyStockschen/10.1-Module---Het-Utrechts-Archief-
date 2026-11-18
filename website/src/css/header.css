@@ -1,0 +1,320 @@
+/* Geport uit 6.1 _legacy_php/css/style.css — zelfde kleuren, font en layout. */
+
+:root {
+    --green: #166a5a;
+    --green-dark: #247065;
+    --green-light: #288074;   /* zoekknop, zelfde als hetutrechtsarchief.nl */
+    --red: #e44421;
+    --red-deep: #d72f19;
+    /* Paars uit de agenda-blokken van hetutrechtsarchief.nl (#494370), in drie tinten: */
+    --purple-light: #767294;  /* tijdlijnknoppen: HUA-paars + 25% wit = lichtste tint waarop witte tekst nog goed leesbaar is (contrast 4.56) */
+    --purple: #5a557d;        /* hover: zoals HUA's agenda-blok er op hun site uitziet */
+    --purple-dark: #3e3963;   /* huidige plek in de tijdlijn */
+    --black: #000;
+    --gray: #f5f5f5;
+    --paper: #F5F1E8;
+    --brown: rgba(139, 111, 71, 0.95);
+    --font: system-ui, Arial, sans-serif;
+    --ease-out: cubic-bezier(0.39, 0.575, 0.565, 1); /* zelfde easing als HUA */
+}
+
+body {
+    margin: 0;
+    font-family: var(--font);
+    color: var(--black);
+    padding-top: 75px;
+}
+
+.site-main { min-height: calc(100vh - 75px); }
+
+/* HEADER */
+.site-header {
+    background: #fff;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 5000;
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Zoekknop en logo staan "absolute" (los van de rest), net als op
+   hetutrechtsarchief.nl. Daarom:
+   - padding-left 90px  → ruimte voor de zoekknop (15 + 60 + 15)
+   - max-width 1200px   → zelfde containerbreedte als HUA én als de
+                          video/kaart eronder, dus alles lijnt uit.
+   Het menu wordt met margin-left: auto naar rechts geduwd (zie .main-nav). */
+.header-inner {
+    display: flex;
+    align-items: center;
+    padding: 0 3rem 0 90px;
+    max-width: 1200px;
+    margin: 0 auto;
+    overflow: visible;
+    height: 75px;
+    position: relative;
+}
+
+/* LOGO — maten 1-op-1 overgenomen van hetutrechtsarchief.nl.
+   Bovenaan de pagina: rood blok van 120x120 met het volledige logo, dat
+   onder de header uit hangt. Na scrollen (body.is-scrolled, zie
+   header-scroll.js) krimpt het blok naar 60x60 en verschijnt het compacte
+   logo. Volgorde van de animatie (zelfde timing als HUA):
+   1. oude logo vervaagt → 2. blok krimpt/groeit → 3. nieuwe logo verschijnt. */
+.site-logo {
+    position: absolute;
+    right: 15px;
+    top: 15px;
+    width: 120px;
+    height: 120px;
+    background: var(--red-deep);
+    z-index: 10;
+    transition: width 0.4s var(--ease-out) 0.2s, height 0.4s var(--ease-out) 0.2s;
+}
+
+.site-logo img {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.site-logo__full    { transition: opacity 0.2s var(--ease-out) 0.5s; }
+.site-logo__compact { opacity: 0; transition: opacity 0.2s var(--ease-out); }
+
+.is-scrolled .site-logo          { width: 60px; height: 60px; }
+.is-scrolled .site-logo__full    { opacity: 0; transition: opacity 0.3s var(--ease-out); }
+.is-scrolled .site-logo__compact { opacity: 1; transition: opacity 0.2s var(--ease-out) 0.5s; }
+
+/* ZOEKKNOP — maten 1-op-1 van hetutrechtsarchief.nl: groen vierkant van
+   60x60 linksboven dat precies tot de onderrand van de header loopt.
+   --search-icon bepaalt de icoongrootte (wordt kleiner op kleine schermen). */
+.search-toggle {
+    --search-icon: 24px;
+    position: absolute;
+    left: 15px;
+    top: 15px;
+    width: 60px;
+    height: 60px;
+    padding: 0;
+    background: var(--green-light);
+    border: none;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+}
+
+/* Donkerder bij hover en zolang de zoekbalk open staat (zoals HUA). */
+.search-toggle:hover,
+.search-toggle[aria-expanded="true"] { background: var(--green-dark); }
+
+.search-toggle .search_close { font-size: var(--search-icon); font-weight: 600; line-height: 1; }
+.search_icon img { width: var(--search-icon); height: var(--search-icon); object-fit: contain; display: block; }
+.search_openen_ { display: none; }
+
+/* margin-left: auto duwt het menu naar rechts, tegen het logo aan.
+   Voordeel boven justify-content: flex-end: als het scherm te smal is,
+   valt "auto" terug naar 0 en begint het menu gewoon na de zoekknop,
+   in plaats van links buiten beeld te schuiven.
+   margin-right houdt ruimte vrij zodat het menu niet onder het logo valt. */
+.main-nav { margin-left: auto; margin-right: 150px; }
+
+/* NAVIGATION */
+.main-nav__list {
+    display: flex;
+    align-items: center;
+    list-style: none;
+    gap: 0.5rem;
+    padding: 0;
+    margin: 0;
+}
+
+.main-nav__list span:hover,
+.contact_nav a:hover,
+.english_nav a:hover { text-decoration: underline; }
+
+.main-nav__link {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.8rem 0.5rem;
+    font-size: 1rem;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: var(--black);
+    font-weight: bold;
+    text-decoration: none;
+    font-family: inherit;
+}
+
+.contact_nav a { font-size: 1.1rem; }
+.english_nav a { font-weight: normal; font-size: 1.1rem; }
+
+.main-nav__link--plain,
+.main-nav__link--italic { color: var(--black); text-decoration: none; }
+.main-nav__link--italic { font-style: italic; }
+
+.main-nav__list > li { position: relative; }
+
+.dropdown_arrow {
+    display: inline-block;
+    transition: transform 0.2s ease;
+    font-size: 1rem;
+}
+
+.dropdown_open > .main-nav__link {
+    background: var(--red-deep);
+    color: #fff;
+}
+.dropdown_open > .main-nav__link span { color: inherit; }
+
+/* DROPDOWN MENU */
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 220px;
+    background: #fff;
+    border: 1px solid #ddd;
+    padding: 0.75rem 0;
+    list-style: none;
+    margin: 0;
+    z-index: 6000;
+    font-weight: bold;
+}
+.dropdown_open .dropdown-menu { display: block; }
+.dropdown-menu li a {
+    display: block;
+    padding: 0.45rem 1rem;
+    color: var(--black);
+    text-decoration: none;
+}
+.dropdown-menu li a:hover { text-decoration: underline; }
+.dropdown_open .dropdown_arrow { transform: rotate(90deg); }
+
+/* SEARCH BAR */
+.search-bar {
+    display: flex;
+    top: 0;
+    gap: 1rem;
+    padding: 0 2rem;
+    background: #fff;
+    max-width: 800px;
+    margin-left: 225px;
+    width: 100%;
+    height: 71px;
+    opacity: 1;
+    transition: all 0.4s ease;
+}
+
+.search-bar::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 800px;
+    border-top: 2px solid #ddd;
+}
+
+.search-bar[hidden] {
+    opacity: 0;
+    height: 0;
+    overflow: hidden;
+    padding-top: 0;
+    padding-bottom: 0;
+    display: flex;
+}
+
+.search-bar__form {
+    flex: 1;
+    display: flex;
+    gap: 0.5rem;
+    height: 60px;
+    border-top: 3px solid #ddd;
+}
+
+.search-bar__form input[type="search"] {
+    flex: 1;
+    border: none;
+    padding: 0.6rem;
+    font-size: 1rem;
+    font-style: italic;
+    font-weight: 520;
+    outline: none;
+}
+
+.search-bar__form button {
+    background: var(--green-dark);
+    border: none;
+    padding: 0.5rem 1.3rem;
+    color: white;
+    cursor: pointer;
+    font-size: 1.2rem;
+    font-weight: 550;
+    margin-top: -2px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .header-inner { max-width: 100%; padding: 0.5rem 1.5rem; gap: 1rem; flex-wrap: nowrap; }
+    .main-nav__link { font-size: 0.9rem; padding: 0.6rem 0.35rem; }
+    .contact_nav a, .english_nav a { font-size: 0.95rem; }
+    .search-bar { max-width: 100%; margin-left: 0; padding: 0 1.5rem; height: 64px; }
+    .search-bar__form { border-top: 2px solid #ddd; height: 56px; }
+    .search-bar__form input[type="search"] { width: 100%; }
+}
+
+@media (max-width: 768px) {
+    .header-inner { padding: 0.5rem 1rem; gap: 0.75rem; }
+    .main-nav__link { font-size: 0.85rem; padding: 0.5rem 0.3rem; }
+    .main-nav__link span:not(.dropdown_arrow) { display: none; }
+    .contact_nav a, .english_nav a { font-size: 0.85rem; }
+    .search-bar { padding: 0 1rem; }
+}
+
+/* LOGO + ZOEKKNOP op kleinere schermen — zelfde stappen als
+   hetutrechtsarchief.nl (breakpoints 1200 / 960 / 720 px).
+   Dit blok staat bewust onderaan, zodat het voorrang krijgt op de
+   padding-regels hierboven. padding-left van .header-inner = ruimte voor
+   de zoekknop (afstand links + breedte + marge), zodat het menu er nooit
+   overheen schuift. */
+@media (max-width: 1199px) {
+    .site-logo              { right: 12px; top: 12px; width: 96px; height: 96px; }
+    .is-scrolled .site-logo { width: 48px; height: 48px; }
+    .search-toggle          { left: 12px; top: 12px; width: 48px; height: 48px; --search-icon: 20px; }
+    .header-inner           { padding-left: 72px; }
+}
+
+@media (max-width: 959px) {
+    .site-logo              { right: 9px; top: 9px; width: 72px; height: 72px; }
+    .is-scrolled .site-logo { width: 36px; height: 36px; }
+    .search-toggle          { left: 9px; top: 9px; width: 36px; height: 36px; --search-icon: 18px; }
+    .header-inner           { padding-left: 54px; }
+    /* Menu iets compacter, zodat het tussen zoekknop en logo past. */
+    .main-nav__list         { gap: 0.25rem; }
+    .main-nav__link         { padding-left: 0.25rem; padding-right: 0.25rem; }
+}
+
+@media (max-width: 719px) {
+    .site-logo              { right: 10px; top: 8px; width: 64px; height: 64px; }
+    .is-scrolled .site-logo { width: 44px; height: 44px; }
+    .search-toggle          { left: 10px; top: 8px; width: 44px; height: 44px; }
+    .header-inner           { padding-left: 64px; }
+    .main-nav__list         { gap: 0.125rem; }
+    .main-nav__link         { padding-left: 0.2rem; padding-right: 0.2rem; }
+}
+
+/* Geen logo-animatie voor bezoekers die "minder beweging" hebben aangezet
+   in hun besturingssysteem (toegankelijkheid). */
+@media (prefers-reduced-motion: reduce) {
+    .site-logo,
+    .site-logo img { transition: none !important; }
+}

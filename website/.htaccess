@@ -1,0 +1,28 @@
+Options -Indexes +FollowSymLinks
+
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+    Header set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+</IfModule>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    # block dotfiles like .env
+    RewriteRule "(^|/)\." - [F]
+</IfModule>
+
+# deny source folders
+RedirectMatch 403 ^/includes/.*$
+RedirectMatch 403 ^/db/.*$
+RedirectMatch 403 ^/docker/.*$
+RedirectMatch 403 ^/docs/.*$
+RedirectMatch 403 ^/src/.*$
+RedirectMatch 403 ^/node_modules/.*$
+
+<FilesMatch "\.(env|md|json|lock|sql|yml|yaml)$">
+    Require all denied
+</FilesMatch>
+
+ErrorDocument 404 /404.php

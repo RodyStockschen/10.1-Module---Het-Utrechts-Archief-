@@ -1,0 +1,110 @@
+/* Geport uit 6.1 _legacy_php/css/style.css — zelfde kleuren, font en layout. */
+
+.site-footer {
+    border-top: 1px solid #eee;
+    background: #fff;
+    margin-top: 3rem;
+}
+
+.footer-inner {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 3rem 2rem 2rem;
+    font-size: 0.95rem;
+    color: var(--black);
+}
+
+.footer-columns {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr 1.2fr;
+    gap: 3rem;
+    margin-bottom: 3rem;
+}
+
+.footer-column,
+.footer-column-contact { min-width: 0; }
+
+.footer-title { font-size: 1.05rem; font-weight: 600; margin: 0 0 0.75rem; }
+.footer-subtitle { font-size: 0.95rem; font-weight: 600; margin: 1.5rem 0 0.5rem; }
+
+.footer-linklist { list-style: none; margin: 0; padding: 0; }
+.footer-linklist li { margin-bottom: 0.35rem; }
+.footer-linklist a {
+    position: relative;
+    text-decoration: none;
+    color: var(--black);
+    padding-left: 1.25rem;
+    display: inline-block;
+}
+.footer-linklist a::before {
+    content: "›";
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: var(--red);
+}
+.footer-linklist a:hover { text-decoration: underline; }
+.footer-link-italic { font-style: italic; }
+
+.footer-contact-list { list-style: none; margin: 0 0 1.5rem; padding: 0; }
+.footer-contact-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    margin-bottom: 0.4rem;
+}
+.footer-contact-icon { color: var(--red); font-size: 1rem; line-height: 1.4; }
+.footer-contact-list a { color: var(--red); text-decoration: none; }
+.footer-contact-list a:hover { text-decoration: underline; }
+
+.footer-social-links {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 0.4rem;
+}
+.footer-social-links a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--red);
+    color: var(--red);
+    text-decoration: none;
+    font-size: 0.8rem;
+}
+.footer-social-links a:hover { background: var(--red); color: #fff; }
+
+.footer-newsletter { margin-bottom: 2.5rem; }
+.footer-newsletter-title { font-size: 1.1rem; font-weight: 500; margin: 0 0 1rem; }
+.footer-newsletter-form { display: flex; max-width: 520px; }
+.footer-newsletter-form input[type="email"] {
+    flex: 1;
+    border: none;
+    border-bottom: 1px solid #ccc;
+    padding: 0.6rem 0;
+    font-size: 1rem;
+    background: transparent;
+}
+.footer-newsletter-form button {
+    border: none;
+    background: var(--red);
+    color: #fff;
+    padding: 0.7rem 2.5rem;
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+.footer-newsletter-form button:hover { opacity: 0.9; }
+
+.footer-kvk { text-align: right; font-size: 0.8rem; color: #555; }
+.footer-kvk p { margin: 0; }
+
+@media (max-width: 1024px) {
+    .footer-inner { padding: 2rem 1.5rem 1.5rem; }
+    .footer-columns { grid-template-columns: 1fr 1fr; gap: 2rem; }
+}
+@media (max-width: 768px) {
+    .footer-columns { grid-template-columns: 1fr; }
+    .footer-kvk { text-align: left; margin-top: 1rem; }
+}

@@ -1,0 +1,582 @@
+/* ============================================================================
+   HERO BANNER — alleen de groene balk met de titel (model: image #2)
+   ============================================================================ */
+.hero-banner {
+    background: var(--gray);
+    padding: 1.5rem 0 0;
+}
+
+.hero-banner__bar {
+    background: var(--green);
+    padding: 1.25rem 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.hero-banner__title {
+    font-family: inherit;
+    color: #fff;
+    font-size: clamp(1.8rem, 4.5vw, 3rem);
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.01em;
+}
+
+@media (max-width: 768px) {
+    .hero-banner__bar { padding: 1rem 1.5rem; }
+}
+
+/* ============================================================================
+   PLAYER — video + minimap even hoog, timeline eronder
+   ============================================================================ */
+.player {
+    background: var(--gray);
+    padding: 2rem 1.5rem 2.5rem;
+}
+
+.player__stage {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    gap: 1.5rem;
+    align-items: stretch;
+}
+
+.player__video-wrap {
+    position: relative;
+    background: #000;
+    aspect-ratio: 768 / 576;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.player__video {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    background: #000;
+}
+
+/* Hotspot-knop onder de video — rood, pulsing dot */
+.player__hotspot {
+    position: absolute;
+    left: 50%;
+    bottom: 1rem;
+    transform: translateX(-50%);
+    z-index: 10;
+}
+
+.player__hotspot-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: var(--red);
+    color: #fff;
+    border: none;
+    padding: 0.7rem 1.4rem 0.7rem 2.2rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+}
+
+.player__hotspot-btn:hover { background: var(--red-deep); }
+
+.player__hotspot-dot {
+    position: absolute;
+    left: 0.9rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 14px;
+    height: 14px;
+    background: var(--red);
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px #fff;
+}
+
+.player__hotspot-dot::before,
+.player__hotspot-dot::after {
+    content: "";
+    position: absolute;
+    inset: -14px;
+    background: var(--red);
+    border-radius: 50%;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.player__hotspot-dot::before { animation: glowAnimation 1.8s 0.3333s ease-out infinite; }
+.player__hotspot-dot::after  { animation: glowAnimation 1.8s 0.6666s ease-out infinite; }
+
+@keyframes glowAnimation {
+    0%   { opacity: 0; transform: scale(0); }
+    5%   { opacity: 1; }
+    100% { opacity: 0; transform: scale(1); }
+}
+
+/* ============================================================================
+   MINIMAP — even hoog als video, met zoom-knop
+   ============================================================================ */
+.minimap {
+    background: #fff;
+    padding: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.minimap__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.minimap__title {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0;
+    color: var(--black);
+    font-weight: 700;
+}
+
+.minimap__zoom-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: var(--red);
+    color: #fff;
+    border: none;
+    padding: 0.4rem 0.7rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.minimap__zoom-btn:hover { background: var(--red-deep); }
+
+.minimap__frame {
+    position: relative;
+    flex: 1;
+    overflow: hidden;
+    background: #ddd;
+    min-height: 240px;
+}
+
+/* Stage = container met image + pins, wordt met JS gescaled + getranslated
+   zodat het focus-gebied (centrum Utrecht / Oudegracht) in beeld komt. */
+.minimap__stage {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(1);
+    transform-origin: center center;
+    transition: transform 0.3s ease;
+    will-change: transform;
+}
+
+.minimap__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+/* PIN — scale(1/zoom) compenseert de minimap-stage zoom zodat de pin
+   altijd dezelfde visuele grootte heeft ongeacht het inzoomniveau. */
+.minimap__pin {
+    position: absolute;
+    transform: translate(-50%, -50%) scale(calc(1 / var(--minimap-zoom, 1)));
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    z-index: 2;
+    transform-origin: center center;
+}
+
+.minimap__pin-dot {
+    display: block;
+    width: 18px;
+    height: 18px;
+    margin: 6px auto;
+    background: var(--red);
+    border: 2px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+    transition: transform 0.2s ease;
+    position: relative;
+}
+
+.minimap__pin:hover .minimap__pin-dot { transform: scale(1.15); }
+
+.minimap__pin.is-active .minimap__pin-dot::before,
+.minimap__pin.is-active .minimap__pin-dot::after {
+    content: "";
+    position: absolute;
+    inset: -14px;
+    background: var(--red);
+    border-radius: 50%;
+    opacity: 0;
+}
+.minimap__pin.is-active .minimap__pin-dot::before { animation: glowAnimation 1.8s 0.3333s ease-out infinite; }
+.minimap__pin.is-active .minimap__pin-dot::after  { animation: glowAnimation 1.8s 0.6666s ease-out infinite; }
+
+/* MARKER — crème-wit viewport indicator (zelfde zoom-compensatie) */
+.minimap__marker {
+    position: absolute;
+    transform: translate(-50%, -50%) scale(calc(1 / var(--minimap-zoom, 1)));
+    width: 44px;
+    height: 44px;
+    pointer-events: none;
+    z-index: 3;
+    transition: left 0.25s linear, top 0.25s linear, opacity 0.3s ease, transform 0.3s ease;
+    opacity: 0;
+    transform-origin: center center;
+}
+
+.minimap__marker.is-visible { opacity: 1; }
+
+.minimap__marker-dot {
+    position: absolute;
+    inset: 12px;
+    background: rgba(245, 241, 232, 0.4);
+    border: 3px solid var(--paper);
+    border-radius: 50%;
+    box-shadow: 0 0 20px rgba(245, 241, 232, 0.6);
+}
+
+.minimap__marker-pulse {
+    position: absolute;
+    inset: 0;
+    border: 2px solid var(--paper);
+    border-radius: 50%;
+    animation: marker-pulse 1.8s infinite ease-out;
+}
+
+@keyframes marker-pulse {
+    0%   { transform: scale(0.6); opacity: 0.9; }
+    100% { transform: scale(1.4); opacity: 0; }
+}
+
+/* ============================================================================
+   ROUTE SVG — lijn door alle locaties in sort_order volgorde, met overlay
+   die mee-beweegt met de video-voortgang. Wordt gebruikt in beide views.
+   ============================================================================ */
+.route-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+    overflow: visible;
+}
+
+.route-svg__full {
+    fill: none;
+    stroke: rgba(0, 0, 0, 0.35);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 4 3;
+}
+
+.route-svg__progress {
+    fill: none;
+    stroke: var(--red);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.45));
+}
+
+/* ============================================================================
+   TIMELINE — één doorlopende paarse balk in de stijl van de agenda-blokken op
+   hetutrechtsarchief.nl: geen witte rand, witte tekst, klein regeltje
+   (starttijd) boven een vette titel (locatienaam).
+   ============================================================================ */
+.timeline {
+    margin: 2rem auto 0;
+    max-width: 1200px;
+}
+
+.timeline__title {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 0.75rem;
+    color: var(--black);
+    text-align: center;
+    font-weight: 700;
+}
+
+/* Geen witte achtergrond of schaduw meer: de knoppen vullen de hele balk.
+   isolation: isolate geeft de tijdlijn een eigen "lagen-stapel", zodat de
+   z-index'en hieronder alleen binnen de tijdlijn gelden. */
+.timeline__track {
+    position: relative;
+    height: 64px;
+    overflow: hidden;
+    isolation: isolate;
+}
+
+/* Voortgang: dun donker lijntje onderin dat meegroeit met de film.
+   Bewust géén donkere waas over de knoppen: alleen de huidige plek is
+   donker. player.js zet de breedte tijdens het afspelen. */
+.timeline__progress {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 4px;
+    width: 0%;
+    background: var(--purple-dark);
+    transition: width 0.25s linear;
+    pointer-events: none;   /* klikken gaat er dwars doorheen naar de knop */
+    z-index: 1;             /* boven de kleur van de knoppen */
+}
+
+/* Let op: bewust géén z-index op de knop zelf, anders valt het
+   voortgangslijntje eronder. */
+.timeline__segment {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 0.15rem;
+    padding: 0 1rem;
+    background: var(--purple-light);
+    border: 0;
+    border-right: 2px solid rgba(0, 0, 0, 0.18);  /* donker scheidingslijntje */
+    color: #fff;
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.5s var(--ease-out);   /* zelfde hover-animatie als HUA */
+}
+
+.timeline__segment:last-of-type { border-right: 0; }
+
+/* Hover: een tint donkerder (zelfde soort effect als op HUA). */
+.timeline__segment:hover { background: var(--purple); }
+
+/* Huidige plek: het donkerst, zodat je meteen ziet waar de film is.
+   Ook bij hover blijft hij donker. */
+.timeline__segment.is-active,
+.timeline__segment.is-active:hover { background: var(--purple-dark); }
+
+/* Zichtbare focus voor toetsenbordgebruikers (Tab-toets). */
+.timeline__segment:focus-visible {
+    outline: 3px solid #fff;
+    outline-offset: -6px;
+}
+
+.timeline__segment-time,
+.timeline__segment-label {
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* te lange naam → "Winkel van Si…" */
+}
+
+/* Geen doorzichtigheid op de tijd: op de lichtere knoppen zou de
+   tekst dan te slecht leesbaar worden. */
+.timeline__segment-time {
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.timeline__segment-label {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+/* ============================================================================
+   MAP ZOOM MODAL — fullscreen pan + zoom view
+   ============================================================================ */
+.map-zoom {
+    position: fixed;
+    inset: 0;
+    z-index: 8000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.map-zoom[hidden] { display: none; }
+
+.map-zoom__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+}
+
+.map-zoom__stage {
+    position: relative;
+    width: 95vw;
+    height: 95vh;
+    display: flex;
+    flex-direction: column;
+    background: #000;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+.map-zoom__toolbar {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    display: flex;
+    gap: 0.4rem;
+    z-index: 2;
+}
+
+.map-zoom__btn {
+    width: 40px;
+    height: 40px;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    font-size: 1.3rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: inherit;
+}
+
+.map-zoom__btn:hover { background: rgba(0, 0, 0, 0.85); }
+
+.map-zoom__btn--close { background: var(--red); border-color: var(--red-deep); }
+.map-zoom__btn--close:hover { background: var(--red-deep); }
+
+.map-zoom__btn--wide {
+    width: auto;
+    padding: 0 1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* Verberg pins + labels wanneer de toggle actief is. De route-lijn
+   zelf blijft zichtbaar — die hoort bij de reis, niet bij de locaties. */
+.map-zoom__stage.pins-hidden .map-zoom__pin {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+.map-zoom__viewport {
+    position: relative;
+    flex: 1;
+    overflow: hidden;
+    cursor: grab;
+    touch-action: none;
+}
+
+.map-zoom__viewport:active { cursor: grabbing; }
+
+.map-zoom__stage {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(1);
+    transform-origin: center center;
+    transition: transform 0.15s ease-out;
+    will-change: transform;
+}
+
+.map-zoom__viewport.is-panning .map-zoom__stage { transition: none; }
+
+.map-zoom__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    user-select: none;
+    -webkit-user-drag: none;
+    pointer-events: none;
+}
+
+/* Pins op de volledige kaart — bewegen mee met zoom/pan. Visual grootte wordt
+   via JS gecompenseerd (--map-zoom-scale), zodat ze altijd klikbaar blijven. */
+.map-zoom__pin {
+    position: absolute;
+    transform: translate(-50%, -50%) scale(calc(1 / var(--map-zoom-scale, 1)));
+    transform-origin: center center;
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    font-family: inherit;
+}
+
+.map-zoom__pin-dot {
+    width: 22px;
+    height: 22px;
+    background: var(--red);
+    border: 3px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px var(--red), 0 2px 8px rgba(0, 0, 0, 0.5);
+    transition: transform 0.2s ease;
+}
+
+.map-zoom__pin:hover .map-zoom__pin-dot { transform: scale(1.2); }
+
+.map-zoom__pin-label {
+    background: rgba(0, 0, 0, 0.75);
+    color: #fff;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+    border-radius: 3px;
+}
+
+/* ============================================================================
+   Responsive
+   ============================================================================ */
+@media (max-width: 1024px) {
+    .player__stage { grid-template-columns: 1fr; }
+    .minimap__frame { min-height: 320px; aspect-ratio: 345 / 300; }
+}
+
+/* Tijdlijn op tablet: iets kleinere tekst, zodat de namen in de smalle
+   knoppen (Domtoren en Stadhuisbrug zijn maar 30 sec) passen. */
+@media (max-width: 900px) {
+    .timeline__segment       { padding: 0 0.55rem; }
+    .timeline__segment-time  { font-size: 0.72rem; }
+    .timeline__segment-label { font-size: 0.8rem; }
+}
+
+/* Tijdlijn op mobiel: de namen passen niet meer → alleen de starttijd,
+   gecentreerd. (Zelfde breakpoint als de header: 720px.) */
+@media (max-width: 719px) {
+    .timeline__track         { height: 48px; }
+    .timeline__segment       { padding: 0 0.4rem; align-items: center; }
+    .timeline__segment-time  { font-size: 0.8rem; }
+    .timeline__segment-label { display: none; }
+}
+
+@media (max-width: 640px) {
+    .hero-banner { padding: 1rem 0 0; }
+    .player { padding: 1.5rem 1rem; }
+    .map-zoom__stage { width: 100vw; height: 100vh; }
+}
