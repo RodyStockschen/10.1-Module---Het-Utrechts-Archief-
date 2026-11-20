@@ -7,6 +7,7 @@ $errors = [];
 
 $item = [
     'id' => 0, 'location_id' => 0, 'image_path' => '', 'year' => '', 'sort_order' => 0,
+    'credit' => '', 'source_url' => '',
 ];
 $i18n = [
     'nl' => ['title' => '', 'description' => ''],
@@ -56,6 +57,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $descNl     = trim((string)($_POST['desc_nl'] ?? ''));
     $titleEn    = trim((string)($_POST['title_en'] ?? ''));
     $descEn     = trim((string)($_POST['desc_en'] ?? ''));
+    // Bronvermelding (archief, maker, licentie) en link naar de foto in de beeldbank
+    $credit     = trim((string)($_POST['credit'] ?? ''));
+    $sourceUrl  = trim((string)($_POST['source_url'] ?? ''));
 
     $imagePath = $item['image_path'] ?? '';
 
@@ -70,16 +74,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($titleNl === '')  $errors[] = 'Nederlandse titel is verplicht.';
     if ($titleEn === '')  $errors[] = 'English title is required.';
     if ($imagePath === '' && !$id) $errors[] = 'Afbeelding is verplicht.';
+    // De link wordt klikbaar op de site: alleen echte webadressen toestaan
+    // (geen javascript:-links of andere trucs).
+    if ($sourceUrl !== '' && (!filter_var($sourceUrl, FILTER_VALIDATE_URL) || !preg_match('#^https?://#i', $sourceUrl))) {
+        $errors[] = 'De link naar het archief moet een webadres zijn dat begint met https://.';
+    }
 
     if (!$errors) {
         try {
             db()->beginTransaction();
+            $creditDb = $credit !== '' ? $credit : null;
+            $urlDb    = $sourceUrl !== '' ? $sourceUrl : null;
             if ($id > 0) {
-                q('UPDATE archive_items SET location_id=?, image_path=?, year=?, sort_order=? WHERE id=?',
-                    [$locationId, $imagePath, $year, $sortOrder, $id]);
+                q('UPDATE archive_items SET location_id=?, image_path=?, year=?, credit=?, source_url=?, sort_order=? WHERE id=?',
+                    [$locationId, $imagePath, $year, $creditDb, $urlDb, $sortOrder, $id]);
             } else {
-                q('INSERT INTO archive_items (location_id, image_path, year, sort_order) VALUES (?,?,?,?)',
-                    [$locationId, $imagePath, $year, $sortOrder]);
+                q('INSERT INTO archive_items (location_id, image_path, year, credit, source_url, sort_order) VALUES (?,?,?,?,?,?)',
+                    [$locationId, $imagePath, $year, $creditDb, $urlDb, $sortOrder]);
                 $id = (int)db()->lastInsertId();
             }
             foreach ([['nl', $titleNl, $descNl], ['en', $titleEn, $descEn]] as [$lang, $title, $desc]) {
@@ -101,6 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $item = array_merge($item, [
         'location_id' => $locationId, 'image_path' => $imagePath,
         'year' => $year ?? '', 'sort_order' => $sortOrder,
+        'credit' => $credit, 'source_url' => $sourceUrl,
     ]);
     $i18n['nl'] = ['title' => $titleNl, 'description' => $descNl];
     $i18n['en'] = ['title' => $titleEn, 'description' => $descEn];
@@ -148,6 +160,21 @@ require __DIR__ . '/_layout.php';
         <div class="cms-form__row">
             <label for="year">Jaar</label>
             <input id="year" name="year" type="number" min="1800" max="2100" value="<?= e((string)$item['year']) ?>">
+        </div>
+
+        <!-- Bronvermelding: de licenties (bijv. CC BY 4.0) vragen om de naam van de maker -->
+        <div class="cms-form__row">
+            <label for="credit">Bronvermelding</label>
+            <input id="credit" name="credit" type="text" maxlength="255"
+                   placeholder="bijv. Het Utrechts Archief (22122) · C. Stevens · CC BY 4.0"
+                   value="<?= e((string)($item['credit'] ?? '')) ?>">
+        </div>
+
+        <div class="cms-form__row">
+            <label for="source_url">Link naar het archief</label>
+            <input id="source_url" name="source_url" type="url" maxlength="255"
+                   placeholder="https://hetutrechtsarchief.nl/beeldmateriaal/detail/…"
+                   value="<?= e((string)($item['source_url'] ?? '')) ?>">
         </div>
 
         <div class="cms-form__row">

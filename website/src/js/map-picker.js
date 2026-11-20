@@ -30,9 +30,14 @@ export function initMapPicker() {
       `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(${scale})`
   }
 
+  // Kaart passend in het venster zetten. Dat kan alleen als de kaart zichtbaar
+  // is: in een dichtgeklapt blok (<details>) is hij 0 breed. Geeft true terug
+  // als het gelukt is.
+  let fitted = false
   function fit() {
     const vw = viewport.clientWidth
     const vh = viewport.clientHeight
+    if (!vw || !vh) return false // nog dichtgeklapt: straks opnieuw proberen
     const iw = image.naturalWidth  || 1
     const ih = image.naturalHeight || 1
     stage.style.width  = iw + 'px'
@@ -41,6 +46,7 @@ export function initMapPicker() {
     scale = baseFit
     tx = 0; ty = 0
     apply()
+    return true
   }
 
   function zoomBy(factor, cx = null, cy = null) {
@@ -67,13 +73,21 @@ export function initMapPicker() {
     if (coordsEl) coordsEl.textContent = `X ${xPct.toFixed(1)}%, Y ${yPct.toFixed(1)}%`
   }
 
-  if (image.complete && image.naturalWidth) fit()
-  else image.addEventListener('load', fit, { once: true })
+  if (image.complete && image.naturalWidth) fitted = fit()
+  else image.addEventListener('load', () => { fitted = fit() }, { once: true })
+
+  // Zit de kaart in een inklapbaar blok? Dan bij het (eerste keer) openklappen
+  // passend maken. Daarna onthoudt hij je zoom als je dicht- en openklapt.
+  picker.closest('details')?.addEventListener('toggle', (e) => {
+    if (e.target.open && !fitted && image.naturalWidth) fitted = fit()
+  })
 
   window.addEventListener('resize', () => {
-    // alleen fit() als we nog nooit hebben gezoomd/pand → anders alleen baseFit herberekenen
-    const ratio = scale / baseFit
     const vw = viewport.clientWidth, vh = viewport.clientHeight
+    if (!vw || !vh) return                 // dichtgeklapt: niets te doen
+    if (!fitted) { fitted = fit(); return } // nog nooit passend gemaakt
+    // al passend gemaakt → zoomniveau behouden, alleen baseFit herberekenen
+    const ratio = scale / baseFit
     const iw = image.naturalWidth || 1, ih = image.naturalHeight || 1
     baseFit = Math.min(vw / iw, vh / ih)
     scale = baseFit * ratio

@@ -14,7 +14,7 @@ if ($locationId <= 0) {
 }
 
 $items = q(
-    "SELECT a.id, a.image_path, a.year, i.title, i.description
+    "SELECT a.id, a.image_path, a.year, a.credit, a.source_url, i.title, i.description
      FROM archive_items a
      JOIN archive_i18n i ON i.archive_item_id = a.id AND i.lang = ?
      WHERE a.location_id = ?

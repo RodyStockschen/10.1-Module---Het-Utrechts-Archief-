@@ -59,58 +59,153 @@
     background: #000;
 }
 
-/* Hotspot-knop onder de video — rood, pulsing dot */
+/* De volledig-scherm-knop van de browser zelf weghalen (Chrome/Edge/Safari).
+   controlsList="nofullscreen" in index.php maakt hem alleen grijs; wij
+   gebruiken onze eigen knop rechtsboven (zie .player__fullscreen). */
+.player__video::-webkit-media-controls-fullscreen-button { display: none; }
+
+/* ---------- Hotspot: rood locatielabel in de video ----------------------------
+   Een pil met een witte stip en de naam van de plek; rondom pulseert een
+   zachte rode gloed. Komt een plek in beeld, dan fadet het label snel in.
+   Eén klik → de film pauzeert en de pop-up komt uit het label (player.js).
+   Staat boven de tijdbalk en knoppen van de video (die beslaan de onderste
+   ±60px), zodat je die gewoon kunt blijven gebruiken. */
 .player__hotspot {
     position: absolute;
-    left: 50%;
-    bottom: 1rem;
-    transform: translateX(-50%);
+    left: 12px;
+    right: 12px;
+    bottom: 76px;
     z-index: 10;
+    display: flex;
+    justify-content: center; /* label in het midden */
+    pointer-events: none;    /* alleen het label zelf is klikbaar, niet de hele breedte */
 }
+
+/* Nodig door display: flex hierboven: anders wint die van het hidden-attribuut
+   en blijft het label staan als er geen locatie in beeld is. */
+.player__hotspot[hidden] { display: none; }
 
 .player__hotspot-btn {
     position: relative;
     display: inline-flex;
     align-items: center;
-    gap: 0.75rem;
+    max-width: 100%;
+    height: 48px;
+    padding: 0 18px 0 0;
+    border: 3px solid #fff;
+    border-radius: 999px; /* pil: ronde uiteinden */
     background: var(--red);
     color: #fff;
-    border: none;
-    padding: 0.7rem 1.4rem 0.7rem 2.2rem;
+    font-family: inherit;
     font-size: 0.95rem;
     font-weight: 600;
+    white-space: nowrap;
     cursor: pointer;
-    font-family: inherit;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+    pointer-events: auto;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+    transition: background 0.2s ease;
 }
 
 .player__hotspot-btn:hover { background: var(--red-deep); }
+.player__hotspot-btn:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
 
+/* Witte stip links van de tekst. */
 .player__hotspot-dot {
-    position: absolute;
-    left: 0.9rem;
-    top: 50%;
-    transform: translateY(-50%);
+    flex-shrink: 0;
     width: 14px;
     height: 14px;
-    background: var(--red);
+    margin: 0 10px 0 14px;
     border-radius: 50%;
-    box-shadow: 0 0 0 2px #fff;
+    background: #fff;
 }
 
-.player__hotspot-dot::before,
-.player__hotspot-dot::after {
+/* Zachte rode gloed die rond de hele pil naar buiten pulseert (zoals eerst
+   bij de ronde knop). box-shadow volgt vanzelf de ronde vorm van de pil.
+   inset: -3px = precies over de witte rand (border) heen.
+   Twee golven, een halve slag (0,9 s) na elkaar. */
+.player__hotspot-btn::before,
+.player__hotspot-btn::after {
     content: "";
     position: absolute;
-    inset: -14px;
-    background: var(--red);
-    border-radius: 50%;
-    opacity: 0;
+    inset: -3px;
+    border-radius: inherit;
     pointer-events: none;
+    animation: hotspot-glow 1.8s ease-out infinite;
 }
 
-.player__hotspot-dot::before { animation: glowAnimation 1.8s 0.3333s ease-out infinite; }
-.player__hotspot-dot::after  { animation: glowAnimation 1.8s 0.6666s ease-out infinite; }
+.player__hotspot-btn::after { animation-delay: 0.9s; }
+
+@keyframes hotspot-glow {
+    0%   { box-shadow: 0 0 0 0 rgba(228, 68, 33, 0.45); } /* --red, half doorzichtig */
+    100% { box-shadow: 0 0 0 16px rgba(228, 68, 33, 0); }
+}
+
+/* Naam te lang voor een smalle video (telefoon)? Dan eindigt hij op "…". */
+.player__hotspot-label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ---------- Icoonknoppen bovenin de video ---------------------------------
+   Linksboven: info (rode labels) verbergen/tonen (player.js).
+   Rechtsboven: volledig scherm (video-fullscreen.js). Die maakt de hele
+   omlijsting groot, zodat het label en de pop-up ook in volledig scherm werken.
+   Beide delen de opmaak van .player__icon-btn (hoekig blokje, net als de
+   pop-up); alleen de plek verschilt. */
+.player__icon-btn {
+    position: absolute;
+    top: 12px;
+    z-index: 11;
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 0; /* hoekig */
+    background: rgba(0, 0, 0, 0.55);
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.player__icon-btn:hover { background: rgba(0, 0, 0, 0.8); }
+.player__icon-btn:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+.player__icon-btn[hidden] { display: none; }
+
+.player__waypoints-toggle { left: 12px; }
+.player__fullscreen       { right: 12px; }
+
+/* Info verborgen (class op de omlijsting, gezet door player.js):
+   - het ronde icoon krijgt een streep erdoor;
+   - het label vervaagt. visibility: hidden haalt het ook uit de Tab-volgorde,
+     zodat je er met het toetsenbord niet meer op uitkomt. */
+.player__waypoints-off { display: none; }
+.player__video-wrap.waypoints-hidden .player__waypoints-on  { display: none; }
+.player__video-wrap.waypoints-hidden .player__waypoints-off { display: block; }
+
+.player__hotspot { transition: opacity 0.25s ease, visibility 0.25s; }
+.player__video-wrap.waypoints-hidden .player__hotspot {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.player__fullscreen-exit { display: none; }
+.player__video-wrap.is-fullscreen .player__fullscreen-enter { display: none; }
+.player__video-wrap.is-fullscreen .player__fullscreen-exit { display: block; }
+
+/* In volledig scherm: de hele film tonen (niets afknippen) en de stip iets
+   hoger, omdat de tijdbalk daar groter is. */
+.player__video-wrap.is-fullscreen { box-shadow: none; }
+.player__video-wrap.is-fullscreen .player__video { object-fit: contain; }
+.player__video-wrap.is-fullscreen .player__hotspot { bottom: 96px; }
+
+/* Geen puls voor wie "minder beweging" heeft aangezet. */
+@media (prefers-reduced-motion: reduce) {
+    .player__hotspot-btn::before,
+    .player__hotspot-btn::after { animation: none; }
+}
 
 @keyframes glowAnimation {
     0%   { opacity: 0; transform: scale(0); }
@@ -312,17 +407,8 @@
     max-width: 1200px;
 }
 
-.timeline__title {
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin: 0 0 0.75rem;
-    color: var(--black);
-    text-align: center;
-    font-weight: 700;
-}
-
-/* Geen witte achtergrond of schaduw meer: de knoppen vullen de hele balk.
+/* De balk zelf is lichtrood: dat zijn de momenten zonder locatie. Klik je
+   daarop, dan spring je naar precies dat moment (player.js).
    isolation: isolate geeft de tijdlijn een eigen "lagen-stapel", zodat de
    z-index'en hieronder alleen binnen de tijdlijn gelden. */
 .timeline__track {
@@ -330,25 +416,35 @@
     height: 64px;
     overflow: hidden;
     isolation: isolate;
+    background: var(--red-light);
+    cursor: pointer;
+    touch-action: pan-y; /* telefoon: horizontaal slepen = tijdlijn, verticaal = pagina scrollen */
+    user-select: none;   /* geen tekst selecteren tijdens het slepen */
 }
 
-/* Voortgang: dun donker lijntje onderin dat meegroeit met de film.
-   Bewust géén donkere waas over de knoppen: alleen de huidige plek is
-   donker. player.js zet de breedte tijdens het afspelen. */
-.timeline__progress {
+/* Tijdens het slepen (player.js): "vastgepakt"-handje, ook boven de blokken */
+.timeline__track.is-dragging,
+.timeline__track.is-dragging * { cursor: grabbing; }
+
+/* Verticaal lijntje: precies waar de film nu is. Wit met een donker randje,
+   zodat het op alle drie de tinten rood goed te zien is.
+   player.js zet de positie (left) tijdens het afspelen. */
+.timeline__playhead {
     position: absolute;
-    left: 0;
+    top: 0;
     bottom: 0;
-    height: 4px;
-    width: 0%;
-    background: var(--purple-dark);
-    transition: width 0.25s linear;
-    pointer-events: none;   /* klikken gaat er dwars doorheen naar de knop */
-    z-index: 1;             /* boven de kleur van de knoppen */
+    left: 0%;
+    width: 3px;
+    margin-left: -1.5px;   /* lijntje precies op het moment centreren */
+    background: #fff;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.55);
+    transition: left 0.25s linear;
+    pointer-events: none;  /* klikken gaat er dwars doorheen naar de balk */
+    z-index: 1;            /* boven de locatieblokken */
 }
 
-/* Let op: bewust géén z-index op de knop zelf, anders valt het
-   voortgangslijntje eronder. */
+/* Let op: bewust géén z-index op de knop zelf, anders valt het lijntje
+   eronder. */
 .timeline__segment {
     position: absolute;
     top: 0;
@@ -359,7 +455,7 @@
     align-items: flex-start;
     gap: 0.15rem;
     padding: 0 1rem;
-    background: var(--purple-light);
+    background: var(--red-deep);
     border: 0;
     border-right: 2px solid rgba(0, 0, 0, 0.18);  /* donker scheidingslijntje */
     color: #fff;
@@ -371,13 +467,13 @@
 
 .timeline__segment:last-of-type { border-right: 0; }
 
-/* Hover: een tint donkerder (zelfde soort effect als op HUA). */
-.timeline__segment:hover { background: var(--purple); }
+/* Locatie onder de muis: een tint donkerder. */
+.timeline__segment:hover { background: var(--red-hover); }
 
-/* Huidige plek: het donkerst, zodat je meteen ziet waar de film is.
+/* Locatie waar de film nu is (het lijntje staat erin): donkerrood.
    Ook bij hover blijft hij donker. */
 .timeline__segment.is-active,
-.timeline__segment.is-active:hover { background: var(--purple-dark); }
+.timeline__segment.is-active:hover { background: var(--red-dark); }
 
 /* Zichtbare focus voor toetsenbordgebruikers (Tab-toets). */
 .timeline__segment:focus-visible {
@@ -462,6 +558,71 @@
 .map-zoom__btn:hover { background: rgba(0, 0, 0, 0.85); }
 
 .map-zoom__btn--close { background: var(--red); border-color: var(--red-deep); }
+
+/* Zoombalk in de werkbalk (map-zoom.js): zelfde donkere, hoekige blok als de
+   knoppen ernaast. --fill (0 tot 1, gezet door map-zoom.js) = hoe ver het
+   schuifje staat; het stuk balk links ervan kleurt wit. */
+.map-zoom__slider {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    height: 40px;
+    padding: 0 0.8rem;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #fff;
+    cursor: pointer;
+}
+
+.map-zoom__slider:hover { background: rgba(0, 0, 0, 0.85); }
+.map-zoom__slider-icon { flex-shrink: 0; }
+
+/* De standaard-opmaak van de browser uitzetten, zodat we hem zelf kunnen stylen */
+.map-zoom__slider input {
+    -webkit-appearance: none;
+    appearance: none;
+    width: clamp(90px, 14vw, 170px); /* groeit mee met het scherm */
+    height: 24px;
+    margin: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+/* Balk (Chrome/Safari): wit tot aan het schuifje, daarna half doorzichtig.
+   Het schuifje is 16px breed, dus zijn midden loopt van 8px tot breedte − 8px. */
+.map-zoom__slider input::-webkit-slider-runnable-track {
+    height: 4px;
+    background: linear-gradient(to right,
+        #fff calc(8px + (100% - 16px) * var(--fill, 0)),
+        rgba(255, 255, 255, 0.35) calc(8px + (100% - 16px) * var(--fill, 0)));
+}
+
+/* Balk (Firefox): die kleurt het stuk links van het schuifje zelf */
+.map-zoom__slider input::-moz-range-track    { height: 4px; background: rgba(255, 255, 255, 0.35); }
+.map-zoom__slider input::-moz-range-progress { height: 4px; background: #fff; }
+
+/* Schuifje: wit vierkantje (hoekig, net als de knoppen) */
+.map-zoom__slider input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    margin-top: -6px; /* (balk 4px − schuifje 16px) / 2 = precies midden op de balk */
+    border: 0;
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+.map-zoom__slider input::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border: 0;
+    border-radius: 0;
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+.map-zoom__slider input:focus-visible { outline: 2px solid #fff; outline-offset: 4px; }
 .map-zoom__btn--close:hover { background: var(--red-deep); }
 
 .map-zoom__btn--wide {
@@ -511,7 +672,10 @@
 }
 
 /* Pins op de volledige kaart — bewegen mee met zoom/pan. Visual grootte wordt
-   via JS gecompenseerd (--map-zoom-scale), zodat ze altijd klikbaar blijven. */
+   via JS gecompenseerd (--map-zoom-scale), zodat ze altijd klikbaar blijven.
+   De knop zelf is alleen de stip; de naam hangt er los (absolute) onder.
+   Zo staat de stip altijd precies op de locatie, of de naam nu zichtbaar
+   is of niet. */
 .map-zoom__pin {
     position: absolute;
     transform: translate(-50%, -50%) scale(calc(1 / var(--map-zoom-scale, 1)));
@@ -522,11 +686,12 @@
     cursor: pointer;
     z-index: 2;
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.25rem;
     font-family: inherit;
 }
+
+/* Aangewezen punt boven de rest, zodat zijn naam niet onder een buur valt. */
+.map-zoom__pin:hover,
+.map-zoom__pin:focus-visible { z-index: 3; }
 
 .map-zoom__pin-dot {
     width: 22px;
@@ -541,6 +706,10 @@
 .map-zoom__pin:hover .map-zoom__pin-dot { transform: scale(1.2); }
 
 .map-zoom__pin-label {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 50%;
+    transform: translateX(-50%);
     background: rgba(0, 0, 0, 0.75);
     color: #fff;
     padding: 0.25rem 0.5rem;
@@ -548,6 +717,21 @@
     font-weight: 600;
     white-space: nowrap;
     border-radius: 3px;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+/* Uitgezoomd liggen de punten te dicht bij elkaar: namen verbergen.
+   map-zoom.js zet .labels-hidden zolang de namen elkaar zouden overlappen.
+   Met de muis op een stip (of er met Tab naartoe) zie je toch díe ene naam. */
+.map-zoom__stage.labels-hidden .map-zoom__pin-label {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.map-zoom__stage.labels-hidden .map-zoom__pin:hover .map-zoom__pin-label,
+.map-zoom__stage.labels-hidden .map-zoom__pin:focus-visible .map-zoom__pin-label {
+    opacity: 1;
+    visibility: visible;
 }
 
 /* ============================================================================
@@ -579,4 +763,8 @@
     .hero-banner { padding: 1rem 0 0; }
     .player { padding: 1.5rem 1rem; }
     .map-zoom__stage { width: 100vw; height: 100vh; }
+
+    /* Telefoon: vergrootglas weg, zodat de werkbalk op één regel past */
+    .map-zoom__slider { padding: 0 0.6rem; }
+    .map-zoom__slider-icon { display: none; }
 }

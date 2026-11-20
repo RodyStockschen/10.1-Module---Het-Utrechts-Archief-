@@ -1,9 +1,11 @@
 /* Modal — gebaseerd op 6.1 intro-modal + info-panel stijl. */
 
+/* z-index 8500: boven de vergrote kaart (8000), want vanuit die kaart kun je
+   ook de pop-up openen; onder het uitlegvenster (9000) en de genie-reepjes. */
 .modal {
     position: fixed;
     inset: 0;
-    z-index: 7000;
+    z-index: 8500;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -12,34 +14,61 @@
 
 .modal[hidden] { display: none; }
 
+/* Donkere achtergrond fadet in/uit (modal.js zet .is-visible), zodat hij
+   meeloopt met het genie-effect van de pop-up. */
 .modal__backdrop {
     position: absolute;
     inset: 0;
     background: rgba(0, 0, 0, 0.6);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.modal.is-visible .modal__backdrop { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+    .modal__backdrop { transition: none; }
 }
 
 .modal__panel {
+    /* Binnenruimte als variabelen: de sluitknop hieronder rekent ermee */
+    --panel-pad-top: 2rem;
+    --panel-pad-x: 2rem;
     position: relative;
     background: #fff;
     max-width: 720px;
     width: 100%;
     max-height: 85vh;
     overflow-y: auto;
-    padding: 2rem 2rem 1.75rem;
-    border-radius: 10px;
+    padding: var(--panel-pad-top) var(--panel-pad-x) 1.75rem;
+    border-radius: 0; /* rechte hoeken, net als op hetutrechtsarchief.nl */
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
     font-size: 0.95rem;
 }
 
+/* Balk zonder hoogte bovenaan de pop-up, met de X erin.
+   position: sticky = "plakken": scrol je in de pop-up, dan blijft de balk op
+   zijn plek staan en schuift de inhoud eronder door. Let op: de browser
+   rekent top vanaf de binnenkant van de padding. top: 0 is dus precies waar
+   de balk al staat, en daardoor schuift hij nooit een stukje mee. */
+.modal__close-bar {
+    position: sticky;
+    top: 0;
+    height: 0;
+    z-index: 2; /* boven de tekst en foto's die eronder doorschuiven */
+}
+
 .modal__close {
     position: absolute;
-    top: 0.75rem;
-    right: 0.75rem;
+    /* 0,75rem uit de hoek van de pop-up. De balk begint pas ná de
+       binnenruimte, daarom trekken we die er weer af. */
+    top: calc(0.75rem - var(--panel-pad-top));
+    right: calc(0.75rem - var(--panel-pad-x));
     width: 32px;
     height: 32px;
     cursor: pointer;
     border: none;
-    background: none;
+    background: #fff; /* wit vlak: zo blijft de X goed te zien boven een foto */
     padding: 0;
     font-size: 0;
 }
@@ -88,15 +117,15 @@
     gap: 1rem;
     background: var(--gray);
     padding: 1rem;
-    border-radius: 6px;
 }
 
+/* contain: de hele archieffoto is te zien, ook staande foto's (niets
+   afknippen); de rest van het vak krijgt een lichtgrijze achtergrond. */
 .archive-item__img {
     width: 100%;
     aspect-ratio: 4/3;
-    object-fit: cover;
+    object-fit: contain;
     background: #ddd;
-    border-radius: 4px;
 }
 
 .archive-item__body h4 {
@@ -121,6 +150,47 @@
 }
 
 @media (max-width: 640px) {
-    .modal__panel { padding: 1.5rem 1.25rem 1.25rem; }
+    .modal__panel { --panel-pad-top: 1.5rem; --panel-pad-x: 1.25rem; padding-bottom: 1.25rem; }
     .archive-item { grid-template-columns: 1fr; }
 }
+
+/* ---------- Tekst uit het archief (onder de kindertekst) -------------------
+   Een groen streepje links, zodat je ziet dat dit een citaat van het
+   archief is. Leeg = verborgen (modal.js). */
+.modal__archive {
+    margin: 0 0 1.5rem;
+    padding: 0.1rem 0 0.1rem 1rem;
+    border-left: 4px solid var(--green-light);
+}
+
+.modal__archive[hidden] { display: none; }
+
+.modal__archive-title {
+    margin: 0 0 0.35rem;
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #555;
+}
+
+.modal__archive-text {
+    margin: 0;
+    font-size: 0.92rem;
+    line-height: 1.55;
+    color: var(--black);
+}
+
+/* Bronvermelding onder een foto: archief, maker, licentie + link */
+.archive-item__credit {
+    margin: 0.6rem 0 0;
+    font-size: 0.78rem;
+    line-height: 1.45;
+    color: #666;
+}
+
+.archive-item__credit a {
+    color: var(--green);
+    font-weight: 600;
+}
+
+.archive-item__credit span { white-space: nowrap; } /* "CC BY-NC 4.0" blijft bij elkaar */

@@ -35,7 +35,8 @@ CREATE TABLE location_i18n (
     location_id       INT UNSIGNED NOT NULL,
     lang              ENUM('nl','en') NOT NULL,
     name              VARCHAR(190) NOT NULL,
-    short_description TEXT NOT NULL,
+    short_description TEXT NOT NULL,          -- korte kindertekst (B1, groep 5/6)
+    archive_text      TEXT NULL,              -- originele tekst van Het Utrechts Archief
     PRIMARY KEY (location_id, lang),
     CONSTRAINT fk_loc_i18n_location FOREIGN KEY (location_id)
         REFERENCES locations(id) ON DELETE CASCADE
@@ -46,6 +47,8 @@ CREATE TABLE archive_items (
     location_id INT UNSIGNED NOT NULL,
     image_path  VARCHAR(255) NOT NULL,
     year        SMALLINT NULL,
+    credit      VARCHAR(255) NULL,            -- bronvermelding: archief, maker, licentie
+    source_url  VARCHAR(255) NULL,            -- link naar de foto in de beeldbank
     sort_order  INT NOT NULL DEFAULT 0,
     created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),

@@ -5,11 +5,11 @@
     --green-dark: #247065;
     --green-light: #288074;   /* zoekknop, zelfde als hetutrechtsarchief.nl */
     --red: #e44421;
-    --red-deep: #d72f19;
-    /* Paars uit de agenda-blokken van hetutrechtsarchief.nl (#494370), in drie tinten: */
-    --purple-light: #767294;  /* tijdlijnknoppen: HUA-paars + 25% wit = lichtste tint waarop witte tekst nog goed leesbaar is (contrast 4.56) */
-    --purple: #5a557d;        /* hover: zoals HUA's agenda-blok er op hun site uitziet */
-    --purple-dark: #3e3963;   /* huidige plek in de tijdlijn */
+    --red-deep: #d72f19;      /* HUA-logorood; ook de locatieblokken in de tijdlijn */
+    /* Extra tinten rood voor de tijdlijn: */
+    --red-light: #f5c4ba;     /* lege stukken: momenten zonder locatie */
+    --red-hover: #bd2a17;     /* locatieblok onder de muis */
+    --red-dark: #8e1c0e;      /* locatie waar de film nu is */
     --black: #000;
     --gray: #f5f5f5;
     --paper: #F5F1E8;

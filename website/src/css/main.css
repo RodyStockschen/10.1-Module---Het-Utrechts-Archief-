@@ -3,12 +3,24 @@
 @import './player.css';
 @import './modal.css';
 @import './help.css';
+@import './genie.css';
 
 * { box-sizing: border-box; }
 
 body {
     background: #fff;
 }
+
+/* Pagina vastgezet zolang er een venster open is (scroll-lock.js).
+   --scrollbar-width = breedte van de scrollbalk die door overflow: hidden
+   verdwijnt. Die ruimte vullen we op, zodat de pagina en de vaste header
+   niet verspringen. */
+body.is-scroll-locked {
+    overflow: hidden;
+    padding-right: var(--scrollbar-width, 0px);
+}
+
+body.is-scroll-locked .site-header { padding-right: var(--scrollbar-width, 0px); }
 
 a { color: inherit; }
 

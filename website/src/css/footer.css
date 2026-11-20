@@ -6,6 +6,11 @@
     margin-top: 3rem;
 }
 
+/* Startpagina: het grijze videoblok sluit direct aan op de footer, zonder
+   lege witte strook ertussen. :has(> .player) = "main waar het videoblok in
+   staat"; de 404-pagina houdt zo gewoon zijn witruimte boven de footer. */
+.site-main:has(> .player) + .site-footer { margin-top: 0; }
+
 .footer-inner {
     max-width: 1000px;
     margin: 0 auto;

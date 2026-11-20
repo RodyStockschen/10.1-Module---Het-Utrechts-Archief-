@@ -1,0 +1,25 @@
+/* ============================================================================
+   GENIE-EFFECT (zie src/js/genie.js)
+   Tijdens de animatie wordt het venster in dunne horizontale reepjes
+   geknipt. Elk reepje wordt apart vervormd en verschoven richting de knop,
+   zodat het venster als door een trechter de knop in wordt gezogen.
+   Gebruikt door het uitlegvenster (?-knop) en de pop-up (pulserende stip).
+   ============================================================================ */
+.genie-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 9100;
+    pointer-events: none;
+}
+
+.genie-strip {
+    position: absolute;
+    overflow: hidden;
+    transform-origin: 0 0;
+    will-change: transform;
+}
+
+/* De knop waar het venster in/uit gaat, tijdens de animatie boven de
+   reepjes en de donkere achtergrond. Zo zie je het venster er echt "in"
+   verdwijnen. (modal.js zet deze class op de pulserende stip.) */
+.genie-target { z-index: 9200 !important; }

@@ -43,7 +43,7 @@ require __DIR__ . '/_layout.php';
                     <td><?= (int)$r['sort_order'] ?></td>
                     <td><?= e($r['name_nl'] ?? '—') ?></td>
                     <td><?= e($r['name_en'] ?? '—') ?></td>
-                    <td><?= number_format((float)$r['video_start_sec'], 1) ?>–<?= number_format((float)$r['video_end_sec'], 1) ?>s</td>
+                    <td><?= e(format_time((float)$r['video_start_sec'])) ?>–<?= e(format_time((float)$r['video_end_sec'])) ?></td>
                     <td><?= (int)$r['n_items'] ?></td>
                     <td>
                         <a href="/cms/locatie-form.php?id=<?= (int)$r['id'] ?>" class="cms-button cms-button--ghost">Bewerken</a>

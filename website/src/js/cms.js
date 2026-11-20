@@ -1,6 +1,7 @@
 import '../css/cms.css'
 import { initMapPicker } from './map-picker.js'
 import { initFocusPicker } from './focus-picker.js'
+import { initTimePreview } from './cms-time-preview.js'
 
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('[data-confirm]').forEach((form) => {
@@ -11,4 +12,5 @@ document.addEventListener('DOMContentLoaded', () => {
   })
   initMapPicker()
   initFocusPicker()
+  initTimePreview()
 })

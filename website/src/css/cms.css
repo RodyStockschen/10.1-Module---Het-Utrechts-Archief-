@@ -5,6 +5,8 @@
     --green-dark: #247065;
     --red: #e44421;
     --red-deep: #d72f19;
+    --red-light: #f5c4ba;  /* tijdlijn: momenten zonder locatie (zelfde als de site) */
+    --red-dark: #8e1c0e;   /* tijdlijn: de locatie die je bewerkt */
     --gray: #f5f5f5;
 }
 
@@ -393,4 +395,194 @@ body.cms-body {
     .map-picker__coords { margin-left: 0; }
     .focus-picker__coords { margin-left: 0; }
     .focus-picker__viewport { max-width: 100%; }
+}
+
+/* ============================================================================
+   VIDEO-PREVIEW bij "Locatie bewerken" (src/js/cms-time-preview.js)
+   Een kleine versie van de video + tijdlijn van de site, zodat je ziet hoe
+   de locatie eruit komt te zien terwijl je de tijden aanpast.
+   ============================================================================ */
+.time-preview {
+    display: grid;
+    gap: 0.6rem;
+    max-width: 560px;
+}
+
+.time-preview__screen {
+    position: relative;
+    aspect-ratio: 768 / 576;
+    background: #000;
+    overflow: hidden;
+}
+
+.time-preview__video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* De pulserende stip zoals op de site (open, met naam). Boven de videobalk. */
+.time-preview__dot {
+    position: absolute;
+    left: 50%;
+    bottom: 56px;
+    transform: translateX(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    height: 34px;
+    padding: 0 0.85rem 0 0.6rem;
+    border: 2px solid #fff;
+    border-radius: 999px;
+    background: var(--red);
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+    pointer-events: none;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
+}
+
+.time-preview__dot[hidden] { display: none; }
+
+/* Geel randje = de locatie die je nu bewerkt */
+.time-preview__dot.is-current { outline: 3px solid #ffd54a; outline-offset: 2px; }
+
+.time-preview__dot-circle {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #fff;
+}
+
+/* Mini-tijdlijn: lichtrood = geen locatie, rood = locaties */
+.time-preview__timeline {
+    position: relative;
+    height: 34px;
+    overflow: hidden;
+    background: var(--red-light);
+    cursor: pointer;
+}
+
+.time-preview__segment {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    padding: 0 0.4rem;
+    border: 0;
+    background: var(--red-deep);
+    color: #fff;
+    font-family: inherit;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+}
+
+/* De locatie die je bewerkt: donkerrood met geel randje */
+.time-preview__segment.is-current {
+    background: var(--red-dark);
+    box-shadow: inset 0 0 0 2px #ffd54a;
+}
+
+/* Verticaal lijntje: waar de video nu is */
+.time-preview__playhead {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 3px;
+    margin-left: -1.5px;
+    background: #fff;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.55);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.time-preview__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.time-preview__actions span { margin-right: auto; }
+
+.time-preview__hint {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #666;
+}
+
+/* Tijd die niet klopt (bijv. "1:7x") */
+.cms-form__row input.is-invalid {
+    border-color: var(--red);
+    background: #fff5f3;
+}
+
+/* ============================================================================
+   INKLAPBARE BLOKKEN (Voorbeeld en Kaart bij "Locatie bewerken")
+   Gebouwd met <details>/<summary>: dicht = alleen de balk, klik = uitklappen.
+   Werkt zonder JavaScript en ook met het toetsenbord (Tab + Enter).
+   ============================================================================ */
+.cms-collapse {
+    border: 1px solid #ddd;
+    background: #fff;
+}
+
+.cms-collapse__summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem 0.6rem;
+    padding: 0.6rem 0.85rem;
+    cursor: pointer;
+    list-style: none; /* standaard driehoekje weg (Firefox) */
+    user-select: none;
+}
+
+.cms-collapse__summary::-webkit-details-marker { display: none; } /* idem (Chrome/Safari) */
+
+/* Eigen pijltje: ▸ dicht, ▾ open */
+.cms-collapse__summary::before {
+    content: "";
+    flex-shrink: 0;
+    width: 0.5rem;
+    height: 0.5rem;
+    margin-right: 0.15rem;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(-45deg);
+    transition: transform 0.2s ease;
+}
+
+.cms-collapse[open] > .cms-collapse__summary::before { transform: rotate(45deg); }
+
+.cms-collapse__summary:hover { background: #fafafa; }
+.cms-collapse__summary:focus-visible { outline: 3px solid var(--green); outline-offset: 2px; }
+.cms-collapse[open] > .cms-collapse__summary { border-bottom: 1px solid #eee; }
+
+.cms-collapse__text { font-weight: 600; }
+.cms-collapse__hint { color: #666; font-size: 0.85rem; }
+
+.cms-collapse__toggle {
+    margin-left: auto;
+    color: var(--green-dark);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* Tekst rechts wisselt tussen "Uitklappen" en "Inklappen" */
+.cms-collapse .when-open { display: none; }
+.cms-collapse[open] .when-open { display: inline; }
+.cms-collapse[open] .when-closed { display: none; }
+
+.cms-collapse__body { padding: 0.85rem; }
+
+@media (prefers-reduced-motion: reduce) {
+    .cms-collapse__summary::before { transition: none; }
 }

@@ -1,9 +1,9 @@
 /* ============================================================================
-   HULP — ronde ?-knop linksonder + "Zo werkt het"-venster met colofon.
-   Werking (openen, sluiten, genie-effect): src/js/help.js
+   HULP — ronde ?-knop linksonder, hint ernaast, en het "Zo werkt het"-venster
+   met een colofonscherm. Werking (openen, sluiten, hint, genie): src/js/help.js
 
    Lagen (z-index), van laag naar hoog:
-     4500 ?-knop (boven de pagina, onder header-menu's en vensters)
+     4500 ?-knop en hint (boven de pagina, onder header-menu's en vensters)
      9000 uitlegvenster + donkere achtergrond
      9100 genie-reepjes tijdens de animatie
      9200 ?-knop zolang het venster open is, zodat het venster er zichtbaar
@@ -48,6 +48,100 @@
     100% { transform: scale(1); }
 }
 
+/* ---------- Hint naast de ?-knop --------------------------------------------
+   Verschijnt bij het openen van de site en verdwijnt na ±20 sec (help.js).
+   Verticaal gecentreerd op de knop: bottom = 16px + halve knop (28px), en
+   translateY(50%) schuift hem een halve eigen hoogte omlaag.
+   Zonder .is-visible: onzichtbaar, iets naar de knop toe geschoven, en door
+   visibility: hidden ook niet klikbaar of bereikbaar met Tab. */
+.help-hint {
+    position: fixed;
+    left: calc(16px + 56px + 14px + env(safe-area-inset-left, 0px));
+    bottom: calc(16px + 28px + env(safe-area-inset-bottom, 0px));
+    z-index: 4500;
+    display: flex;
+    align-items: center;
+    max-width: calc(100vw - 16px - 56px - 14px - 16px);
+    background: var(--green-dark);
+    color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(50%) translateX(-10px);
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+}
+
+.help-hint.is-visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(50%);
+}
+
+.help-hint[hidden] { display: none; }
+
+/* Pijltje naar de ?-knop: een gedraaid vierkantje aan de linkerkant. */
+.help-hint::before {
+    content: "";
+    position: absolute;
+    left: -6px;
+    top: 50%;
+    width: 12px;
+    height: 12px;
+    background: inherit;
+    transform: translateY(-50%) rotate(45deg);
+}
+
+/* De tekst is zelf ook een knop: klikken opent de uitleg. */
+.help-hint__text {
+    position: relative; /* boven het pijltje */
+    padding: 0.65rem 0.25rem 0.65rem 1rem;
+    border: 0;
+    background: none;
+    color: inherit;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.3;
+    text-align: left;
+    cursor: pointer;
+}
+
+.help-hint__text:hover { text-decoration: underline; }
+
+/* Kleine witte X om de hint meteen weg te klikken. */
+.help-hint__close {
+    position: relative;
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    margin-right: 0.35rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    opacity: 0.8;
+}
+
+.help-hint__close:hover { opacity: 1; }
+
+.help-hint__close::before,
+.help-hint__close::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 14px;
+    height: 2px;
+    background: #fff;
+}
+
+.help-hint__close::before { transform: translate(-50%, -50%) rotate(45deg); }
+.help-hint__close::after  { transform: translate(-50%, -50%) rotate(-45deg); }
+
+.help-hint__text:focus-visible,
+.help-hint__close:focus-visible { outline: 3px solid #fff; outline-offset: -3px; }
+
 /* ---------- Venster ------------------------------------------------------- */
 /* De ruimte onderaan (88px = 16 + knop 56 + 16) houdt het venster altijd
    boven de ?-knop; het genie-effect "zuigt" het venster in die knop. */
@@ -80,7 +174,7 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    width: min(1080px, 100%);
+    width: min(660px, 100%);
     max-height: 100%;
     background: #fff;
     border-radius: 10px;
@@ -89,32 +183,24 @@
     outline: none;
 }
 
-/* Zachte binnenkomst bij het laden van de pagina. */
+/* Wie "minder beweging" aan heeft, krijgt geen genie-effect (help.js) maar
+   deze rustige fade: alleen doorzichtig → zichtbaar, zonder beweging. */
 .help.is-entering .help__panel { animation: help-in 0.35s ease both; }
 
 @keyframes help-in {
-    from { opacity: 0; transform: translateY(12px) scale(0.98); }
-    to   { opacity: 1; transform: none; }
+    from { opacity: 0; }
+    to   { opacity: 1; }
 }
 
-/* Breed venster in twee kolommen: links de uitleg, rechts de colofon.
-   Zo past alles zonder scrollen. overflow-y: auto is alleen een vangnet
-   voor hele kleine schermen. */
+/* Eén kolom: de uitleg past zonder scrollen, de colofon heeft een eigen
+   scherm. overflow-y: auto is alleen een vangnet voor hele kleine schermen. */
 .help__body {
-    display: grid;
-    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-    grid-template-areas:
-        "head head"
-        "main credits";
-    column-gap: 2rem;
-    row-gap: 0.9rem;
     overflow-y: auto;
     padding: 1.5rem 2rem 1.1rem;
 }
 
-.help__head    { grid-area: head; }
-.help__main    { grid-area: main; }
-.help__credits { grid-area: credits; }
+/* Van de twee schermen (uitleg / colofon) is er steeds één zichtbaar. */
+.help__view[hidden] { display: none; }
 
 /* Groene X, zelfde stijl als het archiefvenster (modal.css). */
 .help__close {
@@ -148,6 +234,8 @@
 .help__close:hover::before,
 .help__close:hover::after { background-color: var(--green); }
 
+.help__head { margin-bottom: 0.9rem; }
+
 .help__title {
     margin: 0 2.5rem 0.35rem 0;
     font-size: 1.6rem;
@@ -155,13 +243,18 @@
     color: var(--green);
 }
 
+/* De titel krijgt alleen via help.js de focus (bij het wisselen van scherm);
+   een kader eromheen is dan niet nodig. */
+.help__title:focus { outline: none; }
+
 .help__lead {
     margin: 0;
     font-size: 1.05rem;
     line-height: 1.5;
 }
 
-/* Stappen met groene nummerbolletjes (CSS-teller, dus geen losse cijfers in
+/* ---------- Scherm 1: uitleg ----------------------------------------------
+   Stappen met groene nummerbolletjes (CSS-teller, dus geen losse cijfers in
    de HTML nodig). */
 .help__steps {
     list-style: none;
@@ -216,38 +309,61 @@
 }
 
 /* Mini-voorbeelden van de echte knoppen. */
+/* Mini-versie van het rode label in de video (player.css): pil met een
+   witte stip en een zachte rode rand eromheen (de "puls"). */
 .help__sample-hotspot {
     display: inline-flex;
     align-items: center;
-    gap: 0.45rem;
-    padding: 0.2rem 0.65rem 0.2rem 0.5rem;
+    gap: 6px;
+    height: 24px;
+    padding: 0 9px 0 7px;
+    border: 2px solid #fff;
+    border-radius: 999px;
     background: var(--red);
     color: #fff;
-    font-size: 0.78rem;
+    font-size: 0.72rem;
     font-weight: 600;
+    white-space: nowrap;
+    box-shadow: 0 0 0 4px rgba(228, 68, 33, 0.25), 0 1px 4px rgba(0, 0, 0, 0.3);
 }
 
 .help__sample-hotspot::before {
     content: "";
-    width: 8px;
-    height: 8px;
+    flex-shrink: 0;
+    width: 7px;
+    height: 7px;
     border-radius: 50%;
     background: #fff;
 }
 
+/* Mini-tijdlijn: lichtrode balk, rode locaties, donkerrode "nu" met lijntje. */
 .help__sample-timeline {
     display: inline-flex;
+    gap: 6px;
+    padding: 0 6px;
+    background: var(--red-light);
 }
 
 .help__sample-timeline span {
-    width: 40px;
+    width: 30px;
     height: 16px;
-    background: var(--purple-light);
-    border-right: 2px solid rgba(0, 0, 0, 0.18);
+    background: var(--red-deep);
 }
 
-.help__sample-timeline span:last-child { border-right: 0; }
-.help__sample-timeline span.is-now { background: var(--purple-dark); }
+.help__sample-timeline span.is-now {
+    position: relative;
+    background: var(--red-dark);
+}
+
+.help__sample-timeline span.is-now::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 45%;
+    width: 2px;
+    background: #fff;
+}
 
 .help__tip {
     margin: 0;
@@ -258,43 +374,38 @@
     line-height: 1.4;
 }
 
-/* Colofon: grijs blok rechts, film en kaart onder elkaar. */
+/* ---------- Scherm 2: colofon ---------------------------------------------
+   Film en kaart elk in een grijs blok, onder elkaar. */
 .help__credits {
-    padding: 1rem 1.25rem;
-    background: var(--gray);
-    border-radius: 6px;
-    font-size: 0.83rem;
-    line-height: 1.4;
+    font-size: 0.88rem;
+    line-height: 1.45;
 }
 
-.help__credits h3 {
-    margin: 0 0 0.7rem;
-    font-size: 0.8rem;
+.help__credit {
+    padding: 0.85rem 1.1rem;
+    background: var(--gray);
+}
+
+.help__credit + .help__credit { margin-top: 0.75rem; }
+
+.help__credit h3 {
+    margin: 0 0 0.15rem;
+    font-size: 0.78rem;
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: #555;
 }
 
-.help__credit h4 {
-    margin: 0 0 0.15rem;
-    font-size: 0.95rem;
-}
-
 .help__credit p { margin: 0 0 0.25rem; }
+.help__credit-title { font-size: 1rem; font-weight: 600; }
 .help__credit-meta { color: #555; }
-
-.help__credit + .help__credit {
-    margin-top: 0.75rem;
-    padding-top: 0.75rem;
-    border-top: 1px solid #dcdcdc;
-}
 
 .help__credits a {
     color: var(--green);
     font-weight: 600;
 }
 
-/* Onderbalk: "vind me terug" + Aan de slag-knop. */
+/* ---------- Onderbalk: wisselknop (Colofon / Terug) + Aan de slag ---------- */
 .help__footer {
     display: flex;
     align-items: center;
@@ -305,27 +416,23 @@
     background: #fff;
 }
 
-.help__remember {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin: 0;
-    font-size: 0.85rem;
-    color: #555;
+/* Lichte knop met groene rand, zodat "Aan de slag!" de hoofdknop blijft. */
+.help__switch {
+    padding: 0.65rem 1.1rem;
+    border: 2px solid var(--green-light);
+    background: #fff;
+    color: var(--green-dark);
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 0.2s ease;
 }
 
-.help__remember-icon {
-    flex-shrink: 0;
-    width: 22px;
-    height: 22px;
-    display: grid;
-    place-items: center;
-    border-radius: 50%;
-    background: var(--green-light);
-    color: #fff;
-    font-size: 0.8rem;
-    font-weight: 700;
-}
+.help__switch:hover { background: #eef6f4; }
+.help__switch[hidden] { display: none; }
+.help__switch-short { display: none; } /* korte "Terug": alleen op de telefoon */
 
 .help__start {
     padding: 0.75rem 1.5rem;
@@ -343,30 +450,14 @@
 .help__start:hover { background: var(--green-dark); }
 
 .help__start:focus-visible,
+.help__switch:focus-visible,
 .help__close:focus-visible,
 .help__credits a:focus-visible {
     outline: 3px solid var(--green);
     outline-offset: 2px;
 }
 
-/* ---------- Genie-effect ---------------------------------------------------
-   help.js knipt het venster tijdens de animatie in dunne horizontale
-   reepjes. Elk reepje wordt apart versmald, scheef gezet en verschoven
-   richting de ?-knop, zodat het venster als door een trechter de knop in
-   wordt gezogen. */
-.genie-layer {
-    position: fixed;
-    inset: 0;
-    z-index: 9100;
-    pointer-events: none;
-}
-
-.genie-strip {
-    position: absolute;
-    overflow: hidden;
-    transform-origin: 0 0;
-    will-change: transform;
-}
+/* (Opmaak van het genie-effect zelf staat in genie.css.) */
 
 /* ---------- Laag scherm (bijv. laptop 1366x768 met Windows-zoom 125%) -----
    Alles iets compacter en de intro-zin naast de titel, zodat het venster
@@ -375,16 +466,14 @@
     /* onderaan 80px = 16 + knop 56 + 8: venster blijft net boven de ?-knop */
     .help { padding: 8px 16px 80px; }
 
-    .help__body {
-        row-gap: 0.7rem;
-        padding: 1.1rem 1.75rem 0.9rem;
-    }
+    .help__body { padding: 1.1rem 1.75rem 0.9rem; }
 
     .help__head {
         display: flex;
         flex-wrap: wrap;
         align-items: baseline;
         column-gap: 1rem;
+        margin-bottom: 0.7rem;
         padding-right: 2.5rem; /* ruimte voor de sluit-X */
     }
 
@@ -395,43 +484,46 @@
     .help__step p { font-size: 0.88rem; line-height: 1.35; }
     .help__tip { padding: 0.5rem 0.8rem; font-size: 0.85rem; }
 
-    .help__credits { padding: 0.8rem 1rem; font-size: 0.78rem; line-height: 1.35; }
-    .help__credits h3 { margin-bottom: 0.5rem; }
-    .help__credit + .help__credit { margin-top: 0.55rem; padding-top: 0.55rem; }
+    .help__credits { font-size: 0.82rem; line-height: 1.35; }
+    .help__credit { padding: 0.65rem 0.9rem; }
+    .help__credit + .help__credit { margin-top: 0.55rem; }
 
     .help__footer { padding: 0.55rem 1.75rem; }
 }
 
-/* ---------- Smal scherm (telefoon) ------------------------------------------
-   Naast elkaar past hier niet meer: colofon onder de uitleg. */
+/* ---------- Smal scherm (telefoon) ---------------------------------------- */
 @media (max-width: 699px) {
     .help { padding: 16px 12px 80px; } /* 80px = 16 + knop 52 + 12 */
     .help-fab { width: 52px; height: 52px; }
 
-    .help__body {
-        grid-template-columns: 1fr;
-        grid-template-areas:
-            "head"
-            "main"
-            "credits";
-        padding: 1.5rem 1.25rem 1rem;
+    /* Hint schuift mee met de kleinere knop (52px) */
+    .help-hint {
+        left: calc(16px + 52px + 12px + env(safe-area-inset-left, 0px));
+        bottom: calc(16px + 26px + env(safe-area-inset-bottom, 0px));
+        max-width: calc(100vw - 16px - 52px - 12px - 12px);
     }
 
+    .help__body { padding: 1.5rem 1.25rem 1rem; }
     .help__title { font-size: 1.4rem; }
 
+    /* Knoppen naast elkaar (scheelt een hele regel hoogte) */
     .help__footer {
-        flex-direction: column;
-        align-items: stretch;
+        flex-wrap: wrap;
+        gap: 0.6rem;
         padding: 0.9rem 1.25rem;
     }
 
-    .help__start { width: 100%; }
+    .help__switch,
+    .help__start { flex: 1 1 auto; }
+
+    .help__switch-long { display: none; }
+    .help__switch-short { display: inline; }
 }
 
 /* Geen animaties voor bezoekers die "minder beweging" aan hebben staan. */
 @media (prefers-reduced-motion: reduce) {
     .help__backdrop { transition: none; }
-    .help.is-entering .help__panel { animation: none; }
     .help-fab,
     .help-fab.is-receiving { transition: none; animation: none; }
+    .help-hint { transition: none; }
 }

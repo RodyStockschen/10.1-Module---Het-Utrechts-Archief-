@@ -64,7 +64,7 @@ require __DIR__ . '/_layout.php';
         <div class="focus-picker__viewport" data-focus-viewport>
             <div class="focus-picker__stage" data-focus-stage>
                 <img class="focus-picker__image" data-focus-image
-                     src="/assets/img/plattegrond-utrecht-1929-full.jpg"
+                     src="/assets/img/plattegrond-utrecht-1929-full.jpg?v=2"
                      alt="Plattegrond van Utrecht 1929" draggable="false">
                 <?php foreach ($locations as $loc): ?>
                     <span class="focus-picker__pin"
